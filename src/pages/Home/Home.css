@@ -1,0 +1,26 @@
+.inner-container-home {
+    height: 100vh;
+    width: 90vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    /*border: 1px solid red;*/
+    text-align: center;
+}
+
+.inner-container-home h1 {
+    /*border: 1px solid red;*/
+    font-size: 67px;
+}
+
+.inner-container-home h2 {
+    /*border: 1px solid red;*/
+    font-size: 25px;
+    font-weight: normal;
+}
+
+.inner-container-home img {
+    width: 500px;
+    /*border: 1px solid red;*/
+}
