@@ -1,13 +1,28 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import './DetailPage.css';
-import posts from '../../constants/data.json';
+import axios from 'axios';
 import { formatDate } from '../../helpers/FormatDate';
 
 function DetailPage() {
     const { id } = useParams();
     const postId = parseInt(id, 10);
-    const post = posts.find((post) => post.id === postId);
+
+    const [post, setPost] = useState(null);
+
+    useEffect(() => {
+        const fetchPost = async () => {
+            try {
+                const response = await axios.get(`http://localhost:3000/posts/${postId}`);
+                console.log(response.data);
+                setPost(response.data);
+            } catch (error) {
+                console.error('Error fetching post:', error);
+            }
+        };
+
+        fetchPost();
+    }, [postId]);
 
     if (!post) {
         return <p>Post not found</p>;

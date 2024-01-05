@@ -1,24 +1,44 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './NewPosts.css';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 function NewPosts() {
-    const {register, handleSubmit, formState: {errors}} = useForm();
+    const { register, handleSubmit, formState: { errors } } = useForm();
     const navigate = useNavigate();
-    function handleFormSubmit(data) {
-        const enrichedData = {
-            title: data.title,
-            subtitle: data['sub-title'],
-            content: data['blogpost-content'],
-            author: data.name,
-            created: new Date().toISOString(),
-            readTime: calculateReadTime(data['blogpost-content']),
-            comments: 0,
-            shares: 0,
-        };
-        console.log(enrichedData);
-        navigate('/overview');
+
+    const [submissionStatus, setSubmissionStatus] = useState(null);
+
+    async function handleFormSubmit(data) {
+        try {
+            const enrichedData = {
+                title: data.title,
+                subtitle: data['sub-title'],
+                content: data['blogpost-content'],
+                author: data.name,
+                created: new Date().toISOString(),
+                readTime: calculateReadTime(data['blogpost-content']),
+                comments: 0,
+                shares: 0,
+            };
+
+            console.log(enrichedData);
+
+            const response = await axios.post('http://localhost:3000/posts', enrichedData);
+
+            if (response.status === 201) {
+                console.log('Blog post added successfully');
+                const postId = response.data.id;
+                setSubmissionStatus({ success: true, postId });
+            } else {
+                console.error('Error adding blog post. Unexpected status:', response.status);
+                setSubmissionStatus({ success: false });
+            }
+        } catch (error) {
+            console.error('Error submitting blog post:', error);
+            setSubmissionStatus({ success: false });
+        }
     }
 
     function calculateReadTime(content) {
@@ -30,12 +50,11 @@ function NewPosts() {
 
     return (
         <div className="inner-container-new-post">
-
             <h1>Post toevoegen</h1>
             <form className="form" onSubmit={handleSubmit(handleFormSubmit)}>
-            <label htmlFor="title-field">
-                Title
-            </label>
+                <label htmlFor="title-field">
+                    Title
+                </label>
                 <input
                     type="text"
                     {...register("title", {
@@ -48,9 +67,9 @@ function NewPosts() {
                 />
                 {errors.title && <p>{errors.title.message}</p>}
 
-            <label htmlFor="sub-title-field">
-                Subtitle
-            </label>
+                <label htmlFor="sub-title-field">
+                    Subtitle
+                </label>
 
                 <input
                     type="text"
@@ -64,9 +83,9 @@ function NewPosts() {
                 />
                 {errors['sub-title'] && <p>{errors['sub-title'].message}</p>}
 
-            <label htmlFor="name-field">
-                Naam en achternaam
-            </label>
+                <label htmlFor="name-field">
+                    Naam en achternaam
+                </label>
                 <input
                     type="text"
                     {...register("name", {
@@ -79,9 +98,9 @@ function NewPosts() {
                 />
                 {errors.name && <p>{errors.name.message}</p>}
 
-            <label htmlFor="blogpost-field">
-                Blogpost
-            </label>
+                <label htmlFor="blogpost-field">
+                    Blogpost
+                </label>
                 <textarea
                     id="blogpost-field"
                     rows="4"
@@ -102,13 +121,24 @@ function NewPosts() {
                     })}
                 ></textarea>
                 {errors['blogpost-content'] && <p>{errors['blogpost-content'].message}</p>}
-
-
-            <button type="submit">
-                Toevoegen
-            </button>
-
+                <button type="submit">
+                    Toevoegen
+                </button>
             </form>
+
+            {submissionStatus && (
+                <div className="message-sent-blog">
+                    {submissionStatus.success ? (
+                        <p>
+                            De blogpost is succesvol toegevoegd.
+                            Je kunt deze <span onClick={() => navigate(`/posts/${submissionStatus.postId}`)}> hier </span>
+                            bekijken.
+                        </p>
+                    ) : (
+                        <p>Er is een fout opgetreden bij het toevoegen van de blogpost. Probeer het opnieuw.</p>
+                    )}
+                </div>
+            )}
         </div>
     );
 }
