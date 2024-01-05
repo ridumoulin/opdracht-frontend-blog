@@ -15,5 +15,8 @@
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
+}
 
+.form button {
+    background-color: #38E991;
 }
